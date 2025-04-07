@@ -489,7 +489,6 @@ public class CorsFilter implements Ordered, ConditionalFilter {
         }
         MutableHttpResponse<?> resp = HttpResponse.status(HttpStatus.OK);
         decorateResponseWithHeadersForPreflightRequest(request, resp, corsOriginConfiguration);
-        decorateResponseWithHeaders(request, resp, corsOriginConfiguration);
         return resp;
     }
 
