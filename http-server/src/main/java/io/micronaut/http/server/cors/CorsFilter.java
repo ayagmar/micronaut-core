@@ -130,22 +130,21 @@ public class CorsFilter implements Ordered, ConditionalFilter {
     @Nullable
     @Internal
     public final HttpResponse<?> filterPreFlightRequest(HttpRequest<?> request) {
-        if (isEnabled(request) && CorsUtil.isPreflightRequest(request)) {
-            CorsOriginConfiguration corsOriginConfiguration = getAnyConfiguration(request).orElse(null);
-            if (corsOriginConfiguration != null) {
-                return handlePreflightRequest(request, corsOriginConfiguration);
-            }
+        if (!isEnabled(request) || !CorsUtil.isPreflightRequest(request)) {
+            return null; // proceed
         }
-        return null; // proceed
+        CorsOriginConfiguration corsOriginConfiguration = getAnyConfiguration(request).orElse(null);
+        if (corsOriginConfiguration != null) {
+            return handlePreflightRequest(request, corsOriginConfiguration);
+        }
+        return null;
     }
 
     @RequestFilter
     @Nullable
     @Internal
     public final HttpResponse<?> filterRequest(HttpRequest<?> request) {
-        String origin = request.getOrigin().orElse(null);
-        if (origin == null) {
-            LOG.trace("Http Header {} not present. Proceeding with the request.", HttpHeaders.ORIGIN);
+        if (!isEnabled(request)) {
             return null; // proceed
         }
         CorsOriginConfiguration corsOriginConfiguration = getConfiguration(request).orElse(null);
@@ -159,7 +158,9 @@ public class CorsFilter implements Ordered, ConditionalFilter {
                 return forbidden();
             }
             return null; // proceed
-        } else if (shouldDenyToPreventDriveByLocalhostAttack(origin, request)) {
+        }
+        String origin = request.getOrigin().orElse(null);
+        if (shouldDenyToPreventDriveByLocalhostAttack(origin, request)) {
             LOG.trace("The request specifies an origin different than localhost. To prevent drive-by-localhost attacks the request is forbidden");
             return forbidden();
         }
@@ -170,11 +171,11 @@ public class CorsFilter implements Ordered, ConditionalFilter {
     @ResponseFilter
     @Internal
     public final void filterResponse(HttpRequest<?> request, MutableHttpResponse<?> response) {
+        if (!isEnabled(request) || CorsUtil.isPreflightRequest(request)) {
+            return; // proceed
+        }
         CorsOriginConfiguration corsOriginConfiguration = getConfiguration(request).orElse(null);
         if (corsOriginConfiguration != null) {
-            if (CorsUtil.isPreflightRequest(request)) {
-                decorateResponseWithHeadersForPreflightRequest(request, response, corsOriginConfiguration);
-            }
             decorateResponseWithHeaders(request, response, corsOriginConfiguration);
         }
     }
@@ -489,6 +490,7 @@ public class CorsFilter implements Ordered, ConditionalFilter {
         }
         MutableHttpResponse<?> resp = HttpResponse.status(HttpStatus.OK);
         decorateResponseWithHeadersForPreflightRequest(request, resp, corsOriginConfiguration);
+        decorateResponseWithHeaders(request, resp, corsOriginConfiguration);
         return resp;
     }
 
