@@ -64,16 +64,6 @@ public class ResponseFilterOnPreMatchResponseHandlerTest {
     @ServerFilter(MATCH_ALL_PATTERN)
     @Requires(property = "spec.name", value = SPEC_NAME)
     static class ResponseProvidingFilter {
-        @PreMatching
-        @RequestFilter
-        public HttpResponse<?> onPreMatching(MutableHttpRequest<?> request) {
-            return HttpResponse.ok("PRE MATCH RESPONSE");
-        }
-
-        @ResponseFilter
-        public void onResponseWithRouteMatch(RouteMatch<?> routeMatch, MutableHttpResponse<?> response) {
-            response.body(response.getBody(String.class).get() + " XYZ");
-        }
 
         @ResponseFilter
         public void onResponse1(MutableHttpResponse<?> response) {
@@ -86,9 +76,31 @@ public class ResponseFilterOnPreMatchResponseHandlerTest {
         }
 
         @ResponseFilter
+        public void onResponseWithRouteMatch(RouteMatch<?> routeMatch, MutableHttpResponse<?> response) {
+            response.body(response.getBody(String.class).get() + " XYZ");
+        }
+
+        @ResponseFilter
         public void onResponseWithRouteInfo(RouteInfo<?> routeInfo, MutableHttpResponse<?> response) {
             response.body(response.getBody(String.class).get() + " FOOBAR");
         }
+
+        @PreMatching
+        @RequestFilter
+        public HttpResponse<?> onPreMatching(MutableHttpRequest<?> request) {
+            return HttpResponse.ok("PRE MATCH RESPONSE");
+        }
+
+        @ResponseFilter
+        public void onResponse3(MutableHttpResponse<?> response) {
+            response.body(response.getBody(String.class).get() + " RESPONSE #3 FILTER");
+        }
+
+        @ResponseFilter
+        public void onResponse4(MutableHttpResponse<?> response) {
+            response.body(response.getBody(String.class).get() + " RESPONSE #4 FILTER");
+        }
+
     }
 
     @Requires(property = "spec.name", value = SPEC_NAME)

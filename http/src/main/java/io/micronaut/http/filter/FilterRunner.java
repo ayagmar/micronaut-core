@@ -234,8 +234,7 @@ public class FilterRunner {
             } else {
                 // Pre-matching filters plus route match resolver
                 var f = new RouteMatchResolverHttpFilter();
-                filtersToRun.add(0, f); // Response filter to resolve filters on error
-                filtersToRun.add(f); // Request filter to resolve filters after preMatch filters
+                filtersToRun.add(f);
                 iterator = filtersToRun.listIterator();
                 f.filterIterator = iterator;
             }
@@ -397,12 +396,6 @@ public class FilterRunner {
     final class RouteMatchResolverHttpFilter implements InternalHttpFilter {
 
         private ListIterator<InternalHttpFilter> filterIterator;
-        private boolean executed = false;
-
-        @Override
-        public boolean isFiltersResponse() {
-            return true;
-        }
 
         @Override
         public boolean isFiltersRequest() {
@@ -410,22 +403,7 @@ public class FilterRunner {
         }
 
         @Override
-        public ExecutionFlow<FilterContext> processResponseFilter(FilterContext context, Throwable exceptionToFilter) {
-            if (!executed) {
-                cleanupAllNext();
-                addFoundFilters(context.request());
-                moveIteratorToEnd();
-                return ExecutionFlow.just(context);
-            }
-            return ExecutionFlow.just(context);
-        }
-
-        @Override
         public ExecutionFlow<FilterContext> processRequestFilter(FilterContext context) {
-            if (filterIterator.nextIndex() == 1) {
-                return ExecutionFlow.just(context);
-            }
-            executed = true;
             HttpRequest<?> request = context.request();
             try {
                 doRouteMatch(request);
@@ -433,44 +411,18 @@ public class FilterRunner {
             } catch (Throwable throwable) {
                 return processFailurePropagateException(throwable, context);
             } finally {
-                cleanupAllPrevious();
-                addFoundFilters(request);
-                moveIteratorToBeginning();
-            }
-        }
-
-        private void moveIteratorToBeginning() {
-            while (filterIterator.hasPrevious()) {
-                filterIterator.previous();
-            }
-        }
-
-        private void moveIteratorToEnd() {
-            while (filterIterator.hasNext()) {
-                filterIterator.next();
-            }
-        }
-
-        private void addFoundFilters(HttpRequest<?> request) {
-            List<InternalHttpFilter> postFilters = findInternalFiltersAfterRouteMatch(request);
-            for (InternalHttpFilter postFilter : postFilters) {
-                filterIterator.add(postFilter);
-            }
-        }
-
-        private void cleanupAllNext() {
-            filterIterator.remove();
-            while (filterIterator.hasNext()) {
-                filterIterator.next();
                 filterIterator.remove();
-            }
-        }
-
-        private void cleanupAllPrevious() {
-            filterIterator.remove();
-            while (filterIterator.hasPrevious()) {
-                filterIterator.previous();
-                filterIterator.remove();
+                while (filterIterator.hasPrevious()) {
+                    filterIterator.previous();
+                    filterIterator.remove();
+                }
+                List<InternalHttpFilter> postFilters = findInternalFiltersAfterRouteMatch(request);
+                for (InternalHttpFilter postFilter : postFilters) {
+                    filterIterator.add(postFilter);
+                }
+                while (filterIterator.hasPrevious()) {
+                    filterIterator.previous();
+                }
             }
         }
     }

@@ -70,16 +70,6 @@ public class ResponseFilterOnPreMatchExceptionHandlerTest {
     @ServerFilter(MATCH_ALL_PATTERN)
     @Requires(property = "spec.name", value = SPEC_NAME)
     static class ErrorThrowingFilter {
-        @PreMatching
-        @RequestFilter
-        public void onPreMatching(MutableHttpRequest<?> request) {
-            throw new FooException();
-        }
-
-        @ResponseFilter
-        public void onResponseWithRouteMatch(RouteMatch<?> routeMatch, MutableHttpResponse<?> response) {
-            response.body(response.getBody(String.class).get() + " XYZ");
-        }
 
         @ResponseFilter
         public void onResponse1(MutableHttpResponse<?> response) {
@@ -95,6 +85,28 @@ public class ResponseFilterOnPreMatchExceptionHandlerTest {
         public void onResponseWithRouteInfo(RouteInfo<?> routeInfo, MutableHttpResponse<?> response) {
             response.body(response.getBody(String.class).get() + " FOOBAR");
         }
+
+        @ResponseFilter
+        public void onResponseWithRouteMatch(RouteMatch<?> routeMatch, MutableHttpResponse<?> response) {
+            response.body(response.getBody(String.class).get() + " XYZ");
+        }
+
+        @PreMatching
+        @RequestFilter
+        public void onPreMatching(MutableHttpRequest<?> request) {
+            throw new FooException();
+        }
+
+        @ResponseFilter
+        public void onResponse3(MutableHttpResponse<?> response) {
+            response.body(response.getBody(String.class).get() + " RESPONSE #4 FILTER");
+        }
+
+        @ResponseFilter
+        public void onResponse4(MutableHttpResponse<?> response) {
+            response.body(response.getBody(String.class).get() + " RESPONSE #4 FILTER");
+        }
+
     }
 
     @Requires(property = "spec.name", value = SPEC_NAME)
