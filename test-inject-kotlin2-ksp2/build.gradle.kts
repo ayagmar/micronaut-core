@@ -25,6 +25,7 @@ dependencies {
         exclude(group = "io.micronaut")
     }
 
+    testImplementation(projects.testInjectKotlin2Test)
     testImplementation(projects.micronautContext)
     testImplementation(projects.micronautJacksonDatabind)
     testImplementation(libs.managed.kotlin2.stdlib)
@@ -50,17 +51,6 @@ dependencies {
     }
     testImplementation(libs.kotlin.kotest.junit5)
 
-    // Inject Kotlin Test KSP 2
-    testImplementation(libs.managed.ksp2.api)
-    testImplementation(libs.managed.ksp2)
-    testImplementation(libs.managed.kotlin2.compiler.embeddable)
-    testImplementation(libs.ksp2.commonDeps)
-    testImplementation(libs.ksp2.aaEmbeddable)
-    testImplementation(libs.okio)
-    testImplementation(libs.classgraph)
-    testImplementation(libs.javax.persistence)
-    testImplementation(projects.micronautRuntime)
-    testImplementation(libs.blaze.persistence.core)
 }
 
 configurations.all {
