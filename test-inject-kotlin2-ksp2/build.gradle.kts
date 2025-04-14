@@ -19,7 +19,15 @@ dependencies {
 
     implementation(libs.managed.ksp2.api)
 
-    kspTest(project)
+    implementation(projects.micronautInjectKotlin) {
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "com.google.devtools.ksp")
+    }
+
+    kspTest(projects.micronautInjectKotlin) {
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "com.google.devtools.ksp")
+    }
     kspTest(platform(libs.test.boms.micronaut.validation))
     kspTest(libs.micronaut.validation.processor) {
         exclude(group = "io.micronaut")
