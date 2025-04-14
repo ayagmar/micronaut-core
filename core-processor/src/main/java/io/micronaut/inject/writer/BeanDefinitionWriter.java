@@ -3285,6 +3285,9 @@ public final class BeanDefinitionWriter implements ClassOutputWriter, BeanDefini
             });
 
         }
+        if (methodElement.getName().startsWith("setEventPublisher")) {
+            System.out.println("KKK " + methodElement.getName() + " " + methodElement.getClass());
+        }
         if (!requiresReflection) {
             return instanceVar.invoke(methodElement, invocationValues);
         }

@@ -15,6 +15,7 @@
  */
 package io.micronaut.annotation.processing.test.support
 
+import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 import javax.tools.JavaCompiler
 import javax.tools.ToolProvider
