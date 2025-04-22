@@ -2317,7 +2317,7 @@ class Test(val name:  @TypeUseRuntimeAnn String, val secondName: @TypeUseClassAn
             secondNameField
 
             nameField.hasStereotype(TypeUseRuntimeAnn.name)
-            !secondNameField.hasStereotype(TypeUseClassAnn.name)
+            secondNameField.hasStereotype(TypeUseClassAnn.name)
     }
 
     void "test subtypes"() {

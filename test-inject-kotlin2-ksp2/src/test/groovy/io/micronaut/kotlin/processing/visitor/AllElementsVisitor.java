@@ -101,7 +101,7 @@ public class AllElementsVisitor implements TypeElementVisitor<Object, Object> {
 
     private void initializeClassElement(ClassElement classElement, int level) {
         String name = classElement.getName();
-        if (!name.startsWith("test.") && !name.startsWith(Object.class.getName()) && !name.startsWith("kotlin.Any")) {
+        if (!name.startsWith("test.") || name.equals(Object.class.getName()) || name.equals("kotlin.Any")) {
             return;
         }
         if (!visited.add(classElement)) {

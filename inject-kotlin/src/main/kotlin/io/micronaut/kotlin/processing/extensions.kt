@@ -65,10 +65,14 @@ internal fun KSDeclaration.getBinaryName(resolver: Resolver, visitorContext: Kot
     if (qn != null) {
         val asString = resolver.mapKotlinNameToJava(qn)?.asString()
         if (asString != null) {
-            return asString;
+            return asString
         }
     }
-    if (declaration is KSClassDeclaration && declaration.origin != Origin.SYNTHETIC) {
+    if (declaration is KSClassDeclaration) {
+        val qualifiedName = declaration.qualifiedName
+        if (qualifiedName != null && qualifiedName.asString() == "kotlin.Unit") {
+            return "kotlin.Unit"
+        }
         val signature = resolver.mapToJvmSignature(declaration)
         if (signature != null) {
             return Type.getType(signature).className
