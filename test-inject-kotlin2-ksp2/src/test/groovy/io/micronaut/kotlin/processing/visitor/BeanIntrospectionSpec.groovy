@@ -1818,8 +1818,7 @@ enum class Test(val number: Int) {
 
         expect:
         introspection != null
-        introspection.beanProperties.size() == 3
-        introspection.beanProperties.collect {it.name }.sort() == ["name", "number", "ordinal"]
+        introspection.beanProperties.size() == 1
         introspection.getProperty("number").isPresent()
 
         when:
@@ -1828,8 +1827,6 @@ enum class Test(val number: Int) {
         then:
         instance.name() == "A"
         introspection.getRequiredProperty("number", int).get(instance) == 0
-        introspection.getRequiredProperty("name", String).get(instance) == "A"
-        introspection.getRequiredProperty("ordinal", int).get(instance) == 1
 
         when:
         introspection.instantiate()
@@ -1842,6 +1839,29 @@ enum class Test(val number: Int) {
 
         then:
         thrown(ClassNotFoundException)
+    }
+
+    void "test basic enum bean properties"() {
+        BeanIntrospection introspection = buildBeanIntrospection('test.MyEnum', '''
+package test
+
+import io.micronaut.core.annotation.*
+
+@Introspected
+enum class MyEnum {
+    A, B, C;
+}
+''')
+
+        expect:
+            introspection != null
+            introspection.beanProperties.size() == 0
+
+        when:
+            introspection.instantiate("A")
+
+        then:
+            noExceptionThrown()
     }
 
     void "test instantiating an enum"() {

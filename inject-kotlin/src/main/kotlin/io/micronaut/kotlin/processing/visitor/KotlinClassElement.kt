@@ -881,9 +881,10 @@ internal open class KotlinClassElement(
                     t == builtIns.nothingType ||
                     t == builtIns.unitType ||
                     (classNode.qualifiedName != null && (
+                            classNode.qualifiedName!!.asString() == Enum::class.qualifiedName ||
                             classNode.qualifiedName!!.asString() == Enum::class.java.name ||
-                                    classNode.qualifiedName!!.asString() == Record::class.java.name
-                            ))
+                            classNode.qualifiedName!!.asString() == Record::class.java.name
+                        ))
         }
 
         override fun isAbstractClass(declaration: KSDeclaration) : Boolean {

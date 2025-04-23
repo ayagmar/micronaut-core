@@ -24,25 +24,14 @@ import org.objectweb.asm.Type
 
 @OptIn(KspExperimental::class)
 internal fun KSFunctionDeclaration.getBinaryName(resolver: Resolver): String {
-    val name = resolver.getJvmName(this)!!
-    return correct(name)
+    return resolver.getJvmName(this)!!
 }
 
 @OptIn(KspExperimental::class)
 internal fun KSPropertyAccessor.getBinaryName(resolver: Resolver): String {
-    val name = resolver.getJvmName(this)!!
-    return correct(name)
+    return resolver.getJvmName(this)!!
 }
 
-private fun correct(name: String): String {
-    val index = name.indexOfFirst { it == '$' }
-    if (index != -1) {
-        val before = name.substring(0, index)
-        val after = name.substring(index)
-        return before + after.replace("-", "_")
-    }
-    return name
-}
 
 @OptIn(KspExperimental::class)
 internal fun KSDeclaration.getBinaryName(resolver: Resolver, visitorContext: KotlinVisitorContext): String {

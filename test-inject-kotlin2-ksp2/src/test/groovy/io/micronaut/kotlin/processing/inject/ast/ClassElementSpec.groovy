@@ -26,7 +26,7 @@ import io.micronaut.runtime.context.env.ConfigurationAdvice
 import jakarta.validation.Valid
 import spock.lang.PendingFeature
 
-class ClassElementKSP2Spec extends AbstractKotlinCompilerSpec {
+class ClassElementSpec extends AbstractKotlinCompilerSpec {
 
     void "test Java Record compile"() {
         def ce = buildClassElementJava('test.Product2', '''
@@ -154,7 +154,7 @@ class MyBean {}
         then:
             definition
 
-            AllElementsVisitor.VISITED_CLASS_ELEMENTS.size() == 4
+            AllElementsVisitor.VISITED_CLASS_ELEMENTS.size() == 3
             def enumEl = AllElementsVisitor.VISITED_CLASS_ELEMENTS.find {
                 it.name == 'test.HelloController$Channel'
             }
