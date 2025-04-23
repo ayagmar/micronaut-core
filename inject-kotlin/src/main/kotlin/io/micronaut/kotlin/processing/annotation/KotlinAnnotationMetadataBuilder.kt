@@ -501,7 +501,7 @@ internal class KotlinAnnotationMetadataBuilder(
     }
 
     override fun getRepeatableContainerNameForType(annotationType: KSAnnotated): String? {
-        val name = java.lang.annotation.Repeatable::class.java.name
+        val name = Repeatable::class.java.name
         val repeatable = annotationType.annotations.find {
             it.annotationType.resolve().declaration.qualifiedName?.asString() == name
         }
@@ -573,41 +573,31 @@ internal class KotlinAnnotationMetadataBuilder(
         var retention = annotation.annotations.find {
             getAnnotationTypeName(it) == java.lang.annotation.Retention::class.java.name
         }
+        var stringValue: String? = null
         if (retention != null) {
             val value = retention.arguments.find { it.name?.asString() == "value" }?.value
-            if (value is KSType) {
-                return toRetentionPolicy(value)
+            val retentionValue = readAnnotationValue(annotation, value)
+            if (retentionValue != null) {
+                stringValue = retentionValue.toString().replace(java.lang.annotation.Retention::class.java.name + ".", "")
             }
-        } else {
+        }
+        if (stringValue == null) {
             retention = annotation.annotations.find {
                 getAnnotationTypeName(it) == Retention::class.java.name
             }
             if (retention != null) {
                 val value = retention.arguments.find { it.name?.asString() == "value" }?.value
-                if (value is KSType) {
-                    return toJavaRetentionPolicy(value)
+                val retentionValue = readAnnotationValue(annotation, value)
+                if (retentionValue != null) {
+                    stringValue = retentionValue.toString().replace(Retention::class.java.name + ".", "")
                 }
             }
         }
-        return RetentionPolicy.RUNTIME
-    }
-
-    private fun toRetentionPolicy(value: KSType) =
-        RetentionPolicy.valueOf(value.declaration.qualifiedName!!.getShortName())
-
-    private fun toJavaRetentionPolicy(value: KSType) =
-        when (AnnotationRetention.valueOf(value.declaration.qualifiedName!!.getShortName())) {
-            AnnotationRetention.RUNTIME -> {
-                RetentionPolicy.RUNTIME
-            }
-
-            AnnotationRetention.SOURCE -> {
-                RetentionPolicy.SOURCE
-            }
-
-            AnnotationRetention.BINARY -> {
-                RetentionPolicy.CLASS
-            }
+        return when(stringValue) {
+            "SOURCE" -> RetentionPolicy.SOURCE
+            "BINARY", "CLASS" -> RetentionPolicy.CLASS
+            else -> RetentionPolicy.RUNTIME
+        }
     }
 
     private fun readAnnotationValue(originatingElement: KSAnnotated, value: Any?): Any? {
