@@ -449,6 +449,7 @@ interface Three
             }
     }
 
+    @PendingFeature(reason = "https://github.com/google/ksp/issues/2422")
     void "test class element generics"() {
         expect:
             buildClassElement('ast.test.Test', '''

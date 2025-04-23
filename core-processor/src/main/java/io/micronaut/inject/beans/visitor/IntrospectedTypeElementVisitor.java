@@ -474,6 +474,8 @@ public class IntrospectedTypeElementVisitor implements TypeElementVisitor<Object
         writers.put(writer.getBeanType().getName(), writer);
 
         addExecutableMethods(ce, writer, beanProperties);
+
+        writer.finish();
     }
 
     private AnnotationMetadata mergeAnnotations(AnnotationMetadata annotationMetadata) {

@@ -103,10 +103,11 @@ public class ExecutableMethodsDefinitionWriter implements ClassOutputWriter {
     private final Set<String> methodNames = new HashSet<>();
     private final AnnotationMetadata annotationMetadataWithDefaults;
     private final EvaluatedExpressionProcessor evaluatedExpressionProcessor;
-    private ClassDef.ClassDefBuilder classDefBuilder;
 
     private final OriginatingElements originatingElements;
     private final VisitorContext visitorContext;
+
+    private byte[] output;
 
     public ExecutableMethodsDefinitionWriter(EvaluatedExpressionProcessor evaluatedExpressionProcessor,
                                              AnnotationMetadata annotationMetadataWithDefaults,
@@ -229,8 +230,9 @@ public class ExecutableMethodsDefinitionWriter implements ClassOutputWriter {
     @Override
     public void accept(ClassWriterOutputVisitor classWriterOutputVisitor) throws IOException {
         try (OutputStream outputStream = classWriterOutputVisitor.visitClass(className, originatingElements.getOriginatingElements())) {
-            outputStream.write(ByteCodeWriterUtils.writeByteCode(classDefBuilder.build(), visitorContext));
+            outputStream.write(output);
         }
+        output = null;
     }
 
     /**
@@ -243,7 +245,7 @@ public class ExecutableMethodsDefinitionWriter implements ClassOutputWriter {
 
         Function<String, ExpressionDef> loadClassValueExpressionFn = AnnotationMetadataGenUtils.createLoadClassValueExpressionFn(thisType, loadTypeMethods);
 
-        classDefBuilder = ClassDef.builder(className)
+        ClassDef.ClassDefBuilder classDefBuilder = ClassDef.builder(className)
             .synthetic()
             .addAnnotation(Generated.class)
             .superclass(ClassTypeDef.of(AbstractExecutableMethodsDefinition.class));
@@ -332,6 +334,8 @@ public class ExecutableMethodsDefinitionWriter implements ClassOutputWriter {
             classDefBuilder.addMethod(buildGetMethod());
         }
         loadTypeMethods.values().forEach(classDefBuilder::addMethod);
+
+        output = ByteCodeWriterUtils.writeByteCode(classDefBuilder.build(), visitorContext);
     }
 
     private MethodDef buildGetMethod() {
